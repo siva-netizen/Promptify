@@ -30,8 +30,7 @@ Your Critique:
 - Undefined Constraints: The budget and timeline for the plan are missing.
 
 ---
-Now, analyze the following query.
+Now, analyze the user  query.
 
-User Query: "{user_input}"
 Your Critique:
 """
