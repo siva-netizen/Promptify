@@ -612,7 +612,7 @@ wheels = [
 ]
 
 [[package]]
-name = "promtify"
+name = "promptify"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

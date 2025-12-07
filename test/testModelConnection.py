@@ -1,6 +1,6 @@
 from modelConfig import GEMINI
 def testModelConnection():
-    print("Hello from promtify!")
+    print("Hello from promptify!")
     agent_response = GEMINI.invoke([
         {"role": "user", "content": "Hello, how are you?"}
     ])
