@@ -6,7 +6,5 @@ You are a Triage Agent. Classify the User Input into one of these COGNITIVE MODE
 3. MENTOR: User wants to learn, understand concepts, or get explanations. (Keywords: explain, what is, how does it work, teach me, difference between).
 4. ANALYST: User wants feedback, review, debugging help, or critique on existing material. (Keywords: review, analyze, critique, find errors, improve this).
 
-USER INPUT: "{user_input}"
-
 RETURN ONLY THE CATEGORY NAME (e.g., "ARCHITECT").
 """
