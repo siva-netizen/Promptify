@@ -1,6 +1,6 @@
 """Input validation logic"""
 from pathlib import Path
-from utils.errors import (
+from promptify.utils.errors import (
     ValidationError,
     query_too_long_error,
     file_not_found_error
@@ -48,7 +48,7 @@ class InputValidator:
     @staticmethod
     def validate_api_key(api_key: str) -> None:
         """Validate API key exists"""
-        from utils.errors import api_key_missing_error
+        from promptify.utils.errors import api_key_missing_error
         
         if not api_key:
             raise api_key_missing_error()

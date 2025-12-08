@@ -9,7 +9,7 @@ from textual.containers import Vertical, Horizontal, Grid
 from textual.widgets import Header, Footer, Button, Static, Input, Select, Label
 from textual.screen import Screen
 
-from core.providerSelection.config import PromptifyConfig, MODEL_PRESETS
+from promptify.core.providerSelection.config import PromptifyConfig, MODEL_PRESETS
 
 class ConfigTUI(App):
     """Interactive Configuration TUI"""

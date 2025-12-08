@@ -1,6 +1,6 @@
 """Business logic for prompt refinement"""
 from typing import Protocol
-from utils.errors import ServiceError, rate_limit_error, network_error
+from promptify.utils.errors import ServiceError, rate_limit_error, network_error
 
 class PromptifyService:
     """Main service orchestrating prompt refinement"""
@@ -33,7 +33,7 @@ class PromptifyService:
                 raise network_error()
             
             elif "api key" in error_message or "authentication" in error_message:
-                from utils.errors import api_key_missing_error
+                from promptify.utils.errors import api_key_missing_error
                 raise api_key_missing_error()
             
             else:

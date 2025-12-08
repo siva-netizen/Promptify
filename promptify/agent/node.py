@@ -3,14 +3,14 @@ from langchain_core.runnables import RunnableLambda
 import litellm
 
 # Import our custom provider selection logic
-from core.providerSelection.config import PromptifyConfig
-from core.providerSelection.providers import get_provider
+from promptify.core.providerSelection.config import PromptifyConfig
+from promptify.core.providerSelection.providers import get_provider
 
-from prompt.TriageAgentPrompt import TRIAGE_AGENT_PROMPT
-from prompt.CriticAgentPrompt import CRITIQUE_AGENT_PROMPT
-from prompt.expertAgentPrompt import EXPERT_AGENT_PROMPT
-from prompt.promptSmith import PROMPT_SMITH_PROMPT
-from agent.state import AgentState
+from promptify.prompt.TriageAgentPrompt import TRIAGE_AGENT_PROMPT
+from promptify.prompt.CriticAgentPrompt import CRITIQUE_AGENT_PROMPT
+from promptify.prompt.expertAgentPrompt import EXPERT_AGENT_PROMPT
+from promptify.prompt.promptSmith import PROMPT_SMITH_PROMPT
+from promptify.agent.state import AgentState
 
 
 def call_llm(prompt_value) -> str:

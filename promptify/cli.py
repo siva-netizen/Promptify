@@ -11,14 +11,14 @@ from typing import Optional
 import os
 
 # Import core modules
-from core.validator import InputValidator
-from core.service import PromptifyService
-from core.formatter import RichFormatter, JSONFormatter
-from utils.errors import PromptifyError, ValidationError, ServiceError, ConfigurationError
-from agent.graph import promptify
+from promptify.core.validator import InputValidator
+from promptify.core.service import PromptifyService
+from promptify.core.formatter import RichFormatter, JSONFormatter
+from promptify.utils.errors import PromptifyError, ValidationError, ServiceError, ConfigurationError
+from promptify.agent.graph import promptify
 
 # Import CLI Helpers
-from cli_supports.PromptifyTUI import PromptifyTUI
+from promptify.cli_supports.PromptifyTUI import PromptifyTUI
 
 app = typer.Typer(
     name="promptify",
@@ -176,12 +176,12 @@ def config(
     
     # If no arguments provided, run Interactive TUI
     if not any([provider, model, temperature, verbose is not None, show]):
-        from cli_supports.ConfigTUI import ConfigTUI
+        from promptify.cli_supports.ConfigTUI import ConfigTUI
         app = ConfigTUI()
         app.run()
         return
 
-    from core.providerSelection.config import PromptifyConfig
+    from promptify.core.providerSelection.config import PromptifyConfig
     
     # Load existing config
     cfg = PromptifyConfig.load()
