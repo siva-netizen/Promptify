@@ -1,0 +1,8 @@
+model:
+  api_base: null
+  api_key: null
+  max_tokens: null
+  model: cerebras/llama-3.3-70b
+  provider: cerebras
+  temperature: 0.1
+verbose: true
