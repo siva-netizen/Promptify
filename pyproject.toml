@@ -1,5 +1,5 @@
 [project]
-name = "promptify"
+name = "pfy"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -19,8 +19,9 @@ dependencies = [
 [project.scripts]
 promptify = "promptify.cli:app"
 
-[tool.setuptools]
-packages = ["promptify"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["promptify*"]
 
 [build-system]
 requires = ["setuptools>=61.0"]
