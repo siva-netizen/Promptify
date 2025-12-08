@@ -157,5 +157,73 @@ def version():
     console.print("[bold]Agents:[/bold] Triage → Critic → Expert → Smith")
 
 
+@app.command()
+def config(
+    provider: Optional[str] = typer.Option(None, "--provider", "-p", help="Set LLM provider (cerebras, openai, anthropic, local)"),
+    model: Optional[str] = typer.Option(None, "--model", "-m", help="Set model name"),
+    temperature: Optional[float] = typer.Option(None, "--temp", "-t", help="Set temperature (0.0 - 1.0)"),
+    verbose: Optional[bool] = typer.Option(None, "--verbose/--no-verbose", help="Enable/disable verbose mode"),
+    show: bool = typer.Option(False, "--show", help="Show current configuration")
+):
+    """
+    Configure Promptify settings
+    
+    Examples:
+        promptify config            # Launch Interactive UI
+        promptify config --show
+        promptify config --provider openai --model gpt-4
+    """
+    
+    # If no arguments provided, run Interactive TUI
+    if not any([provider, model, temperature, verbose is not None, show]):
+        from cli_supports.ConfigTUI import ConfigTUI
+        app = ConfigTUI()
+        app.run()
+        return
+
+    from core.providerSelection.config import PromptifyConfig
+    
+    # Load existing config
+    cfg = PromptifyConfig.load()
+    
+    # Update if arguments are provided
+    updated = False
+    
+    if provider:
+        cfg.model.provider = provider
+        updated = True
+        console.print(f"[green]Set provider to: {provider}[/green]")
+        
+    if model:
+        cfg.model.model = model
+        updated = True
+        console.print(f"[green]Set model to: {model}[/green]")
+        
+    if temperature is not None:
+        cfg.model.temperature = temperature
+        updated = True
+        console.print(f"[green]Set temperature to: {temperature}[/green]")
+        
+    if verbose is not None:
+        cfg.verbose = verbose
+        updated = True
+        status = "enabled" if verbose else "disabled"
+        console.print(f"[green]Verbose mode {status}[/green]")
+    
+    # Save if changed
+    if updated:
+        cfg.save()
+        console.print("[dim]Configuration saved.[/dim]\n")
+    
+    # Show config if requested or just saved (and not using TUI)
+    if show or updated:
+        console.print("[bold]Current Configuration:[/bold]")
+        console.print(f"  Provider:    [cyan]{cfg.model.provider}[/cyan]")
+        console.print(f"  Model:       [cyan]{cfg.model.model}[/cyan]")
+        console.print(f"  Temperature: [cyan]{cfg.model.temperature}[/cyan]")
+        console.print(f"  Verbose:     [cyan]{cfg.verbose}[/cyan]")
+        console.print(f"  API Key:     [dim]{'Set in .env' if cfg.model.api_key or os.getenv('CEREBRAS_API_KEY') or os.getenv('OPENAI_API_KEY') else 'Missing'}[/dim]")
+
+
 if __name__ == "__main__":
     app()
