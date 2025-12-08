@@ -1,3 +1,4 @@
+
 """
 Configuration using provider registry
 """
@@ -5,7 +6,7 @@ Configuration using provider registry
 from pathlib import Path
 from typing import Optional, Literal
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
 
 ProviderType = Literal["cerebras", "openai", "anthropic", "local"]
 MODEL_PRESETS = {
@@ -39,6 +40,8 @@ class PromptifyConfig(BaseModel):
     model: ModelConfig = Field(default_factory=ModelConfig)
     verbose: bool = False
     
+    _source_path: Optional[Path] = PrivateAttr(default=None)
+    
     @classmethod
     def load(cls, config_path: Optional[Path] = None) -> "PromptifyConfig":
         # Load environment variables from .env if present
@@ -52,7 +55,9 @@ class PromptifyConfig(BaseModel):
              if config_path.exists():
                 with open(config_path) as f:
                     data = yaml.safe_load(f) or {}
-                return cls(**data)
+                obj = cls(**data)
+                obj._source_path = config_path
+                return obj
              return cls()
 
         # Search order: local first, then global
@@ -67,15 +72,19 @@ class PromptifyConfig(BaseModel):
             if path.exists():
                 with open(path) as f:
                     data = yaml.safe_load(f) or {}
-                return cls(**data)
+                obj = cls(**data)
+                obj._source_path = path
+                return obj
         
         return cls()  # Default: Cerebras free tier
     
     def save(self, config_path: Optional[Path] = None):
-        if config_path is None:
-            config_path = Path.home() / ".promptify" / "config.yaml"
+        target_path = config_path or self._source_path
         
-        config_path.parent.mkdir(parents=True, exist_ok=True)
+        if target_path is None:
+            target_path = Path.home() / ".promptify" / "config.yaml"
         
-        with open(config_path, 'w') as f:
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        with open(target_path, 'w') as f:
             yaml.dump(self.model_dump(), f)
