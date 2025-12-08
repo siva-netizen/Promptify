@@ -16,11 +16,12 @@ dependencies = [
     "typer>=0.20.0",
 ]
 
+[project.scripts]
+promptify = "promptify.cli:app"
+
 [tool.setuptools]
-packages = [
-    "agent",
-    "cli_supports",
-    "core",
-    "prompt",
-    "utils"
-]
+packages = ["promptify"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
