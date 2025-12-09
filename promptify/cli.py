@@ -152,7 +152,7 @@ def refine(
 def version():
     """Show version information"""
     show_banner()
-    console.print("[bold]Version:[/bold] 1.0.0")
+    console.print("[bold]Version:[/bold] 0.1.1")
     console.print("[bold]Framework:[/bold] LangGraph + Gemini")
     console.print("[bold]Agents:[/bold] Triage → Critic → Expert → Smith")
 
