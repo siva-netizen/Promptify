@@ -21,17 +21,17 @@ class RichFormatter(OutputFormatter):
     def format_result(self, result: dict, verbose: bool = False) -> str:
         self.console.print(Panel(
             f"[bold green]{result['intent']}[/bold green]",
-            title="🎯 Intent",
+            title="Intent",
             border_style="green"
         ))
         
         if verbose:
-            self.console.print(Panel(result['critique'], title="🔍 Critique"))
-            self.console.print(Panel(result['expert_suggestions'], title="💡 Expert"))
+            self.console.print(Panel(result['critique'], title="Critique"))
+            self.console.print(Panel(result['expert_suggestions'], title="Expert"))
         
         self.console.print(Panel(
             result['final_prompt_draft'],
-            title="✨ Refined",
+            title="* Refined",
             border_style="magenta"
         ))
         

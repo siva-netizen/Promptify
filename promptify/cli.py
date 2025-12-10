@@ -22,7 +22,7 @@ from promptify.cli_supports.PromptifyTUI import PromptifyTUI
 
 app = typer.Typer(
     name="promptify",
-    help="🚀 Transform vague prompts into professional specs using AI agents",
+    help="Transform vague prompts into professional specs using AI agents",
     no_args_is_help=True
 )
 console = Console()
@@ -72,31 +72,43 @@ def refine(
     show_banner()
     
     try:
-        # 1. Validate API key
-        validator.validate_api_key(os.getenv("GOOGLE_GENAI_API_KEY"))
+        # 1. Load config and validate API key dynamically
+        from promptify.core.providerSelection.config import PromptifyConfig
+        cfg = PromptifyConfig.load()
+        provider = cfg.model.provider
+        
+        # Check specific env vars based on provider
+        if provider == "cerebras":
+            validator.validate_api_key(os.getenv("CEREBRAS_API_KEY"))
+        elif provider == "gemini":
+            validator.validate_api_key(os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"))
+        elif provider == "openai":
+            validator.validate_api_key(os.getenv("OPENAI_API_KEY"))
+        elif provider == "anthropic":
+            validator.validate_api_key(os.getenv("ANTHROPIC_API_KEY"))
+        # local might not need api key or uses a different one
+
         
         # 2. Get and validate input
         if file:
-            console.print(f"[dim]📁 Reading from: {file}[/dim]")
+            console.print(f"[dim] Reading from: {file}[/dim]")
             query = validator.validate_file(file)
         else:
             query = validator.validate_query(query)
         
         # Show input
-        console.print(f"[cyan]📝 Query:[/cyan] {query[:100]}{'...' if len(query) > 100 else ''}\n")
+        console.print(f"[cyan] Query:[/cyan] {query[:100]}{'...' if len(query) > 100 else ''}\n")
         
         # 3. Process with progress spinner
         with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
             console=console,
         ) as progress:
-            task = progress.add_task("🤖 AI Agents working...", total=None)
+            task = progress.add_task("[Processing] AI Agents working...", total=None)
             result = service.refine(query)
             progress.remove_task(task)
         
         console.print()
-        console.print("[green]✅ Processing complete![/green]\n")
+        console.print("[green]✔ Processing complete![/green]\n")
         
         result_text = result['final_prompt_draft']
         
@@ -117,32 +129,32 @@ def refine(
         if output:
             output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text(result_text, encoding='utf-8')
-            console.print(f"\n✅ Saved to: [green]{output}[/green]")
+            console.print(f"\n✔ Saved to: [green]{output}[/green]")
         
-        console.print("\n[dim]✨ Done![/dim]")
+        console.print("\n[dim]* Done![/dim]")
     
     except ValidationError as e:
-        console.print(f"[red]❌ Validation Error:[/red]\n{e}")
+        console.print(f"[red]✖ Validation Error:[/red]\n{e}")
         raise typer.Exit(1)
     
     except ConfigurationError as e:
-        console.print(f"[red]❌ Configuration Error:[/red]\n{e}")
+        console.print(f"[red]✖ Configuration Error:[/red]\n{e}")
         raise typer.Exit(1)
     
     except ServiceError as e:
-        console.print(f"[red]❌ Service Error:[/red]\n{e}")
+        console.print(f"[red]✖ Service Error:[/red]\n{e}")
         raise typer.Exit(1)
     
     except PromptifyError as e:
-        console.print(f"[red]❌ Error:[/red]\n{e}")
+        console.print(f"[red]✖ Error:[/red]\n{e}")
         raise typer.Exit(1)
     
     except KeyboardInterrupt:
-        console.print("\n[yellow]⚠️  Interrupted[/yellow]")
+        console.print("\n[yellow]!  Interrupted[/yellow]")
         raise typer.Exit(0)
     
     except Exception as e:
-        console.print(f"[red]❌ Unexpected Error:[/red] {e}")
+        console.print(f"[red]✖ Unexpected Error:[/red] {e}")
         if verbose:
             console.print_exception()
         raise typer.Exit(1)
@@ -153,7 +165,7 @@ def version():
     """Show version information"""
     show_banner()
     console.print("[bold]Version:[/bold] 0.1.1")
-    console.print("[bold]Framework:[/bold] LangGraph + Gemini")
+    console.print("[bold]Framework:[/bold] LangGraph + Python")
     console.print("[bold]Agents:[/bold] Triage → Critic → Expert → Smith")
 
 

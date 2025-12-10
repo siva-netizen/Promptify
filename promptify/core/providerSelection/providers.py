@@ -60,6 +60,21 @@ class AnthropicProvider:
         }
 
 
+class GeminiProvider:
+    """Google Gemini provider"""
+    
+    def __init__(self, model: str = "gemini/gemini-1.5-flash", temperature: float = 0.7):
+        self.model = model
+        self.temperature = temperature
+    
+    def get_litellm_params(self) -> Dict[str, Any]:
+        return {
+            "model": self.model,  # litellm expects "gemini/..." for some, but typically just model name if provider is set, 
+                                  # but here we follow litellm conventions. "gemini/gemini-1.5-flash" is standard.
+            "temperature": self.temperature
+        }
+
+
 class OpenAICompatibleProvider:
     """
     Generic OpenAI-compatible endpoint
@@ -92,6 +107,7 @@ PROVIDER_REGISTRY: Dict[str, type] = {
     "cerebras": CerebrasProvider,
     "openai": OpenAIProvider,
     "anthropic": AnthropicProvider,
+    "gemini": GeminiProvider,
     "local": OpenAICompatibleProvider,  # For OpenAI-compatible local models
 }
 

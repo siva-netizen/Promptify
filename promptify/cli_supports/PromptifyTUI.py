@@ -58,7 +58,7 @@ class PromptifyTUI(App):
     def compose(self) -> ComposeResult:
         yield Header()
         with Vertical(id="result-container"):
-            yield Static("✨ PROMPTIFIED ", id="title")
+            yield Static("* PROMPTIFIED ", id="title")
             yield TextArea(
                 self.result_text,
                 id="result-text",
@@ -66,8 +66,8 @@ class PromptifyTUI(App):
                 show_line_numbers=False
             )
             with Horizontal(id="button-bar"):
-                yield Button("📋 Copy", variant="primary", id="copy-btn")
-                yield Button("❌ Close", variant="error", id="close-btn")
+                yield Button("Copy", variant="primary", id="copy-btn")
+                yield Button("✖ Close", variant="error", id="close-btn")
         yield Footer()
     
     def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -81,8 +81,8 @@ class PromptifyTUI(App):
         """Copy result to clipboard"""
         try:
             pyperclip.copy(self.result_text)
-            self.notify("✅ Copied to clipboard!", severity="information")
+            self.notify("✔ Copied to clipboard!", severity="information")
             self.copied = True
         except Exception as e:
-            self.notify(f"❌ Copy failed: {e}", severity="error")
+            self.notify(f"✖ Copy failed: {e}", severity="error")
     

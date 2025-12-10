@@ -8,7 +8,7 @@ from typing import Optional, Literal
 import yaml
 from pydantic import BaseModel, Field, PrivateAttr
 
-ProviderType = Literal["cerebras", "openai", "anthropic", "local"]
+ProviderType = Literal["cerebras", "openai", "anthropic", "gemini", "local"]
 MODEL_PRESETS = {
     # Cerebras (DEFAULT - free tier)
     "default": {"provider": "cerebras", "model": "cerebras/llama3.1-8b"},
@@ -21,6 +21,11 @@ MODEL_PRESETS = {
     
     # Anthropic
     "claude": {"provider": "anthropic", "model": "claude-3-5-sonnet-20241022"},
+    
+    # Gemini
+    "gemini": {"provider": "gemini", "model": "gemini/gemini-1.5-flash"},
+    "gemini-flash": {"provider": "gemini", "model": "gemini/gemini-1.5-flash"},
+    "gemini-pro": {"provider": "gemini", "model": "gemini/gemini-1.5-pro"},
 }
 
 class ModelConfig(BaseModel):
