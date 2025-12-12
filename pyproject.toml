@@ -1,7 +1,7 @@
 [project]
 name = "pfy"
 version = "0.1.2"
-description = "Add your description here"
+description = "Transform vague prompts into professional specs using AI agents"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

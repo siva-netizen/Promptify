@@ -1,5 +1,5 @@
 """
-Promptify CLI v1.0
+Promptify CLI 
 Thin CLI layer - delegates to core modules
 """
 
@@ -20,7 +20,7 @@ from promptify.agent.graph import promptify
 
 # Import CLI Helpers
 from promptify.cli_supports.PromptifyTUI import PromptifyTUI
-
+from promptify.cli_supports.help_content import HELP_CONTENT
 app = typer.Typer(
     name="promptify",
     help="Transform vague prompts into professional specs using AI agents",
@@ -182,36 +182,30 @@ def version():
 def commands():
     """Show available commands with examples"""
     show_banner()
+    
+    # Commands section
     console.print("[bold]Available commands:[/bold]")
-    console.print("  refine: Refine a prompt using AI agents")
-    console.print("  config: Configure Promptify settings")
-    console.print("  version: Show version information")
-    console.print("  commands: Show available commands")
-    console.print("  help: Show help information")
-    console.print("  exit: Exit the application")
-    console.print("  ")
+    for cmd in HELP_CONTENT.commands:
+        console.print(f"  {cmd.name}: {cmd.description}")
+    console.print()
+    
+    # Usage section
     console.print("[bold]Usage:[/bold]")
-    console.print("  promptify <command> [options]")
-    console.print("  ")
+    console.print(f"  {HELP_CONTENT.usage}")
+    console.print()
+    
+    # Options section
     console.print("[bold]Options:[/bold]")
-    console.print("  --help: Show help information")
-    console.print("  --version: Show version information")
-    console.print("  --commands: Show available commands")
-    console.print("  --config: Configure Promptify settings")
-    console.print("  --exit: Exit the application")
-    console.print("  ")
+    for flag, desc in HELP_CONTENT.options:
+        console.print(f"  {flag}: {desc}")
+    console.print()
+    
+    # Examples section (only for commands that have them)
     console.print("[bold]Examples:[/bold]")
-    console.print("  promptify refine 'build a chat app'")
-    console.print("  promptify refine --file input.txt")
-    console.print("  promptify refine 'design database' --verbose")
-    console.print("  promptify refine 'build api' --format rich")
-    console.print("  promptify refine 'build api' --format json --output result.json")
-    console.print("  promptify config --provider openai --model gpt-4")
-    console.print("  promptify config --show")
-    console.print("  promptify version")
-    console.print("  promptify commands")
-    console.print("  promptify help")
-    console.print("  promptify exit")
+    for cmd in HELP_CONTENT.commands:
+        if cmd.examples:
+            for example in cmd.examples:
+                console.print(f"  {example}")
 
 @app.command()
 def config(
