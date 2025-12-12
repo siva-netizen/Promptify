@@ -6,6 +6,7 @@ Thin CLI layer - delegates to core modules
 import typer
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from importlib.metadata import version as package_version, PackageNotFoundError
 from pathlib import Path
 from typing import Optional
 import os
@@ -159,12 +160,21 @@ def refine(
             console.print_exception()
         raise typer.Exit(1)
 
+def get_version():
+    try:
+        return package_version("pfy")
+    except PackageNotFoundError:
+        import tomllib 
+        pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
+        with open(pyproject_path, "rb") as f:
+            data = tomllib.load(f)
+        return data["project"]["version"] 
 
 @app.command()
 def version():
     """Show version information"""
     show_banner()
-    console.print("[bold]Version:[/bold] 0.1.1")
+    console.print("[bold]Version:[/bold] " + get_version())
     console.print("[bold]Framework:[/bold] LangGraph + Python")
     console.print("[bold]Agents:[/bold] Triage → Critic → Expert → Smith")
 
