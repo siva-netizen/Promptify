@@ -1,0 +1,22 @@
+[project]
+name = "promptify-backend"
+version = "0.1.0"
+description = "Cloud API Backend for Promptify Extension"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn>=0.29.0",
+    "python-multipart>=0.0.9",
+    "promptify-cli",
+]
+
+[tool.uv.sources]
+promptify-cli = { path = "../../cli", editable = true }
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
