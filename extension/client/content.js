@@ -15,15 +15,11 @@ const PLATFORMS = {
         inputSelector: 'div#prompt-textarea',
         containerSelector: 'div.relative.flex.h-full.max-w-full.flex-1',
         getValue: (el) => {
-            // ChatGPT uses contenteditable div, get textContent or innerText
             return el.textContent || el.innerText || '';
         },
         setValue: (el, val) => {
-            // For contenteditable, set textContent
             el.textContent = val;
-            // Trigger input event
             el.dispatchEvent(new Event('input', { bubbles: true }));
-            // Also trigger change for good measure
             el.dispatchEvent(new Event('change', { bubbles: true }));
         }
     },
@@ -35,6 +31,56 @@ const PLATFORMS = {
             el.textContent = val;
             el.dispatchEvent(new Event('input', { bubbles: true }));
         }
+    },
+    PERPLEXITY: {
+        inputSelector: 'textarea, input[placeholder*="Ask"], div[contenteditable="true"]',
+        containerSelector: 'div.relative',
+        getValue: (el) => {
+            if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+                return el.value || '';
+            }
+            return el.textContent || el.innerText || '';
+        },
+        setValue: (el, val) => {
+            el.focus();
+            if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+                const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+                nativeInputValueSetter.call(el, val);
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            } else {
+                el.textContent = val;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
+    },
+    GEMINI: {
+        inputSelector: 'div.ql-editor[contenteditable="true"]',
+        containerSelector: null, // Let the fallback logic find the container with the send button
+        getValue: (el) => el.textContent || el.innerText || '',
+        setValue: (el, val) => {
+            el.focus();
+            el.textContent = val;
+            el.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+            el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: val }));
+        }
+    },
+    COPILOT: {
+        inputSelector: 'textarea[id*="searchbox"], textarea[class*="searchbox"], .show-placeholder[contenteditable="true"]',
+        containerSelector: '.input-container, .cib-serp-main', // Try to find a stable container
+        getValue: (el) => el.value || el.textContent || '',
+        setValue: (el, val) => {
+            el.focus();
+            if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+                el.value = val;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            } else {
+                el.textContent = val;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
     }
 };
 
@@ -42,6 +88,9 @@ function detectPlatform() {
     const host = window.location.hostname;
     if (host.includes('chatgpt.com')) return PLATFORMS.CHATGPT;
     if (host.includes('claude.ai')) return PLATFORMS.CLAUDE;
+    if (host.includes('perplexity.ai')) return PLATFORMS.PERPLEXITY;
+    if (host.includes('gemini.google.com')) return PLATFORMS.GEMINI;
+    if (host.includes('copilot.microsoft.com') || host.includes('bing.com')) return PLATFORMS.COPILOT;
     return null;
 }
 
@@ -55,14 +104,66 @@ if (platform) {
 }
 
 function initObserver() {
-    const observer = new MutationObserver((mutations) => {
-        const input = document.querySelector(platform.inputSelector);
+    const tryInject = () => {
+        // Use the new robust finder
+        const input = findTargetElement(platform.inputSelector);
         if (input && !document.getElementById('promptify-btn')) {
+            log(`Found input via robust search`);
             injectButton(input);
+            return true;
+        }
+        return false;
+    };
+
+    if (!tryInject()) {
+        log('Input not found initially, setting up observer...');
+    }
+
+    const observer = new MutationObserver((mutations) => {
+        if (!document.getElementById('promptify-btn')) {
+            tryInject();
         }
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
+}
+
+/**
+ * Robustly find an element, including traversing open Shadow DOMs.
+ * Useful for platforms like Copilot/Bing that use custom elements.
+ */
+function findTargetElement(selectors) {
+    if (!selectors) return null;
+    const selectorList = selectors.split(',').map(s => s.trim());
+
+    // 1. Try standard query first
+    for (const selector of selectorList) {
+        const el = document.querySelector(selector);
+        if (el) return el;
+    }
+
+    // 2. Try Shadow DOM traversal for specific platforms (like Copilot)
+    // This is a simplified traversal targeting common shadow hosts
+    const shadowHosts = document.querySelectorAll('cib-serp, cib-action-bar, cib-text-input, sh-input-field');
+    for (const host of shadowHosts) {
+        if (host.shadowRoot) {
+            for (const selector of selectorList) {
+                const el = host.shadowRoot.querySelector(selector);
+                if (el) return el;
+
+                // Deep traversal (one level deeper for now)
+                const nestedHosts = host.shadowRoot.querySelectorAll('*');
+                for (const nested of nestedHosts) {
+                    if (nested.shadowRoot) {
+                        const deepEl = nested.shadowRoot.querySelector(selector);
+                        if (deepEl) return deepEl;
+                    }
+                }
+            }
+        }
+    }
+
+    return null;
 }
 
 function injectButton(inputEl) {
@@ -74,15 +175,16 @@ function injectButton(inputEl) {
     </span>`;
 
     btn.style.cssText = `
-        position: absolute;
-        bottom: 8px;
-        right: 60px;
-        z-index: 1000;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        margin-left: auto;
         background: linear-gradient(90deg, #7C3AED, #5B21B6);
         color: white;
         border: none;
         border-radius: 6px;
-        padding: 6px 12px;
+        padding: 8px 16px;
         font-size: 13px;
         font-weight: 500;
         cursor: pointer;
@@ -91,28 +193,67 @@ function injectButton(inputEl) {
         box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
     `;
 
-    // Find the proper container - look for parent that contains both input and send button
-    let container = inputEl.parentElement;
+    btn.onmouseenter = () => {
+        btn.style.opacity = '1';
+        btn.style.transform = 'translateY(-1px)';
+        btn.style.boxShadow = '0 4px 12px rgba(124, 58, 237, 0.4)';
+    };
 
-    // For ChatGPT, traverse up to find the form container with send button
-    let attempts = 0;
-    while (container && attempts < 10) {
-        if (container.querySelector('[data-testid="send-button"]') ||
-            container.querySelector('button[aria-label*="Send"]')) {
-            break;
-        }
-        container = container.parentElement;
-        attempts++;
+    btn.onmouseleave = () => {
+        btn.style.opacity = '0.95';
+        btn.style.transform = 'translateY(0)';
+        btn.style.boxShadow = '0 2px 8px rgba(124, 58, 237, 0.3)';
+    };
+
+    // Find the container that holds the input area
+    let container = null;
+
+    // 1. Try platform-specific container selector first
+    if (platform.containerSelector) {
+        container = inputEl.closest(platform.containerSelector);
     }
 
-    // Fallback to immediate parent if we went too far
+    // 2. Fallback to generic traversal if no specific container found
+    if (!container) {
+        container = inputEl.parentElement;
+        let attempts = 0;
+        while (container && attempts < 10) {
+            if (container.querySelector('[data-testid="send-button"]') ||
+                container.querySelector('button[aria-label*="Send"]') ||
+                container.tagName === 'FORM') {
+                break;
+            }
+            container = container.parentElement;
+            attempts++;
+        }
+    }
+
+    // 3. Ultimate fallback
     if (!container || container === document.body) {
         container = inputEl.parentElement;
     }
 
-    if (container) {
-        container.style.position = 'relative';
-        container.appendChild(btn);
+    log(`Injecting button after container: ${container.tagName} (Class: ${container.className})`);
+
+    // Create a wrapper div to hold the button
+    const buttonWrapper = document.createElement('div');
+    buttonWrapper.id = 'promptify-btn-wrapper';
+    buttonWrapper.style.cssText = `
+        display: flex;
+        justify-content: flex-end;
+        align-items: center; 
+        padding: 4px 12px 8px 12px;
+        width: 100%;
+        position: relative;
+        z-index: 9999;
+        pointer-events: auto;
+    `;
+
+    buttonWrapper.appendChild(btn);
+
+    // Insert the button wrapper after the container for all platforms
+    if (container && container.parentElement) {
+        container.parentElement.insertBefore(buttonWrapper, container.nextSibling);
     }
 
     btn.addEventListener('click', async (e) => {
@@ -144,14 +285,16 @@ function injectButton(inputEl) {
         } catch (err) {
             alert(`Error: ${err.message}`);
         } finally {
-            btn.textContent = "✨ Refine";
+            btn.innerHTML = `<span style="display:flex;align-items:center;gap:6px;">
+        ${PROMPTIFY_ICON}
+        <span>Refine</span>
+    </span>`;
             btn.disabled = false;
         }
     });
 }
 
 function showConfirmation(newText, inputEl) {
-    // Create Modal
     const modal = document.createElement('div');
     modal.style.cssText = `
         position: fixed;
