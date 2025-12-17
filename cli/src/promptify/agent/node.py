@@ -13,7 +13,7 @@ from promptify.prompt.promptSmith import PROMPT_SMITH_PROMPT
 from promptify.agent.state import AgentState
 
 
-def call_llm(prompt_value) -> str:
+def call_llm(prompt_value, config: dict = None) -> str:
     """
     Custom Runnable that takes a LangChain PromptValue,
     converts it to LiteLLM messages, selects the provider from config,
@@ -40,20 +40,34 @@ def call_llm(prompt_value) -> str:
         cfg = PromptifyConfig()
     
     # 3. Prepare Provider Arguments
-    # Helper to construct kwargs from the config model
+    # Start with defaults from loaded config
     provider_kwargs = {
         "model": cfg.model.model,
         "temperature": cfg.model.temperature,
     }
-    # Only forward optional fields if they exist
+    # Only forward optional fields if they exist from loaded config
     if cfg.model.api_base:
         provider_kwargs["api_base"] = cfg.model.api_base
     if cfg.model.api_key:
         provider_kwargs["api_key"] = cfg.model.api_key
 
+    # OVERRIDE with dynamic config if provided
+    if config:
+        if config.get("model"):
+            provider_kwargs["model"] = config["model"]
+        if config.get("api_key"):
+            provider_kwargs["api_key"] = config["api_key"]
+        
+        # If provider is explicitly passed in dynamic config, use it
+        # Note: We need the provider type to get the right provider class
+        # Ideally, config should have 'provider' key.
+        # But get_provider takes 'provider_name' as first arg.
+    
+    provider_name = config.get("provider", cfg.model.provider) if config else cfg.model.provider
+
     # 4. Get Provider & Params
     try:
-        provider = get_provider(cfg.model.provider, **provider_kwargs)
+        provider = get_provider(provider_name, **provider_kwargs)
         litellm_params = provider.get_litellm_params()
         
         # 5. Call LiteLLM
@@ -68,7 +82,7 @@ def call_llm(prompt_value) -> str:
         return error_msg  # Or raise, depending on desired robustness
 
 
-def create_chain(system_prompt: str, include_user_msg: bool = True):
+def create_chain(system_prompt: str, include_user_msg: bool = True, model_config: dict = None):
     """Factory function to create prompt chains using dynamic LLM"""
     messages = [("system", system_prompt)]
     if include_user_msg:
@@ -78,7 +92,8 @@ def create_chain(system_prompt: str, include_user_msg: bool = True):
     
     # Pipe: Template -> Custom LLM Caller
     # We don't need StrOutputParser because call_llm returns a string.
-    return template | RunnableLambda(call_llm)
+    # Bind the config to the call_llm function
+    return template | RunnableLambda(lambda x: call_llm(x, config=model_config))
 
 
 PERSONA_MAP = {
@@ -92,7 +107,7 @@ PERSONA_MAP = {
 def triageAgent(state: AgentState) -> dict:
     """Classifies user intent"""
     print("🔍 [TRIAGE] Analyzing...")
-    chain = create_chain(TRIAGE_AGENT_PROMPT)
+    chain = create_chain(TRIAGE_AGENT_PROMPT, model_config=state.get("model_config"))
     response = chain.invoke({"user_input": state["user_query"]})
     
     intent = response.strip().upper()
@@ -106,7 +121,7 @@ def triageAgent(state: AgentState) -> dict:
 def criticAgent(state: AgentState) -> dict:
     """Identifies gaps in the user query"""
     print("🔍 [CRITIC] Analyzing...")
-    chain = create_chain(CRITIQUE_AGENT_PROMPT)
+    chain = create_chain(CRITIQUE_AGENT_PROMPT, model_config=state.get("model_config"))
     response = chain.invoke({"user_input": state["user_query"]})
     
     print("✅ [CRITIC] Done")
@@ -130,7 +145,7 @@ def expertAgent(state: AgentState) -> dict:
 Provide your expert suggestions now.""")
     ])
     
-    chain = template | RunnableLambda(call_llm)
+    chain = template | RunnableLambda(lambda x: call_llm(x, config=state.get("model_config")))
     
     response = chain.invoke({
         "persona": selected_persona,
@@ -158,7 +173,7 @@ def promptSmith(state: AgentState) -> dict:
 Create the final refined prompt now.""")
     ])
     
-    chain = template | RunnableLambda(call_llm)
+    chain = template | RunnableLambda(lambda x: call_llm(x, config=state.get("model_config")))
     
     response = chain.invoke({
         "user_query": state["user_query"],

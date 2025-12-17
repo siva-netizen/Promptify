@@ -8,10 +8,15 @@ class PromptifyService:
     def __init__(self, graph):
         self.graph = graph
     
-    def refine(self, query: str) -> dict:
+    def refine(self, query: str, model_provider: str = None, model_name: str = None, api_key: str = None) -> dict:
         """Refine a prompt using the agent graph"""
         initial_state = {
             "user_query": query,
+            "model_config": {
+                "provider": model_provider,
+                "model": model_name,
+                "api_key": api_key
+            },
             "intent": "",
             "critique": None,
             "expert_suggestions": "",
