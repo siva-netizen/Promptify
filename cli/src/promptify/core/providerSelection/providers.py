@@ -18,61 +18,87 @@ class ProviderConfig(Protocol):
 class CerebrasProvider:
     """Cerebras Cloud provider (DEFAULT)"""
     
-    def __init__(self, model: str = "cerebras/llama3.1-8b", temperature: float = 0.7):
+    def __init__(self, model: str = "cerebras/llama3.1-8b", temperature: float = 0.7, api_key: str = None, api_base: str = None):
         self.model = model
         self.temperature = temperature
+        self.api_key = api_key
+        self.api_base = api_base or "https://api.cerebras.ai/v1"
     
     def get_litellm_params(self) -> Dict[str, Any]:
-        return {
+        params = {
             "model": self.model,
             "temperature": self.temperature,
-            "api_base": "https://api.cerebras.ai/v1",
+            "api_base": self.api_base,
             "custom_llm_provider": "cerebras",
             "extra_headers": {"X-Cerebras-3rd-Party-Integration": "litellm"}
         }
+        if self.api_key:
+            params["api_key"] = self.api_key
+        return params
 
 
 class OpenAIProvider:
     """OpenAI provider"""
     
-    def __init__(self, model: str = "gpt-3.5-turbo", temperature: float = 0.7):
+    def __init__(self, model: str = "gpt-3.5-turbo", temperature: float = 0.7, api_key: str = None, api_base: str = None):
         self.model = model
         self.temperature = temperature
+        self.api_key = api_key
+        self.api_base = api_base
     
     def get_litellm_params(self) -> Dict[str, Any]:
-        return {
+        params = {
             "model": self.model,
             "temperature": self.temperature
         }
+        if self.api_key:
+            params["api_key"] = self.api_key
+        if self.api_base:
+            params["api_base"] = self.api_base
+        return params
 
 
 class AnthropicProvider:
     """Anthropic Claude provider"""
     
-    def __init__(self, model: str = "claude-3-5-sonnet-20241022", temperature: float = 0.7):
+    def __init__(self, model: str = "claude-3-5-sonnet-20241022", temperature: float = 0.7, api_key: str = None, api_base: str = None):
         self.model = model
         self.temperature = temperature
+        self.api_key = api_key
+        self.api_base = api_base
     
     def get_litellm_params(self) -> Dict[str, Any]:
-        return {
+        params = {
             "model": self.model,
             "temperature": self.temperature
         }
+        if self.api_key:
+            params["api_key"] = self.api_key
+        if self.api_base:
+            params["api_base"] = self.api_base
+        return params
 
 
 class GeminiProvider:
     """Google Gemini provider"""
     
-    def __init__(self, model: str = "gemini/gemini-1.5-flash", temperature: float = 0.7):
+    def __init__(self, model: str = "gemini/gemini-1.5-flash", temperature: float = 0.7, api_key: str = None, api_base: str = None):
         self.model = model
         self.temperature = temperature
+        self.api_key = api_key
+        self.api_base = api_base
     
     def get_litellm_params(self) -> Dict[str, Any]:
-        return {
+        params = {
             "model": self.model,  # litellm expects "gemini/..." for some, but typically just model name if provider is set, 
                                   # but here we follow litellm conventions. "gemini/gemini-1.5-flash" is standard.
             "temperature": self.temperature
         }
+        if self.api_key:
+            params["api_key"] = self.api_key
+        if self.api_base:
+            params["api_base"] = self.api_base
+        return params
 
 
 class OpenAICompatibleProvider:

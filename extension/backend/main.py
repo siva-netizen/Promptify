@@ -39,7 +39,12 @@ async def refine_prompt(request: RefineRequest):
             os.environ[key_name] = request.api_key
         
         # Use the service to refine the prompt
-        result = service.refine(request.prompt)
+        result = service.refine(
+            query=request.prompt,
+            model_provider=request.model_provider,
+            model_name=request.model_name,
+            api_key=request.api_key
+        )
         
         refined = result.get('final_prompt_draft', 'Error: No refined prompt generated')
         

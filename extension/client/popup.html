@@ -69,9 +69,13 @@
         <option value="cerebras">Cerebras (Fast)</option>
         <option value="openai">OpenAI (GPT-4)</option>
         <option value="anthropic">Anthropic (Claude)</option>
+        <option value="gemini">Gemini</option>
     </select>
 
-    <label for="apiKey">API Key (Optional if backend has defaults)</label>
+    <label for="modelName">Model Name (Optional)</label>
+    <input type="text" id="modelName" placeholder="e.g. llama-3.3-70b (default: provider specific)">
+
+    <label for="apiKey">API Key</label>
     <input type="password" id="apiKey" placeholder="sk-...">
 
     <label for="apiUrl">Backend API URL</label>
