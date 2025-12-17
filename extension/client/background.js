@@ -10,12 +10,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function handleRefineRequest(request, sendResponse) {
+    console.log("[Background] Handling refine request:", request);
     try {
         const { prompt } = request;
 
         // Get settings from storage
         const settings = await chrome.storage.sync.get(['apiUrl', 'apiKey', 'provider', 'model']);
         const endpoint = settings.apiUrl || API_URL;
+
+        console.log(`[Background] Using endpoint: ${endpoint}`);
 
         const payload = {
             prompt: prompt,
@@ -24,24 +27,38 @@ async function handleRefineRequest(request, sendResponse) {
             api_key: settings.apiKey
         };
 
-        const response = await fetch(endpoint, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
-        });
+        // Create a timeout signal
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
-        if (!response.ok) {
-            const err = await response.text();
-            throw new Error(`API Error: ${response.status} - ${err}`);
+        try {
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload),
+                signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                const err = await response.text();
+                throw new Error(`API Error: ${response.status} - ${err}`);
+            }
+
+            const data = await response.json();
+            console.log("[Background] Refinement successful");
+            sendResponse({ success: true, refined: data.refined_prompt });
+
+        } catch (fetchError) {
+            clearTimeout(timeoutId);
+            throw fetchError;
         }
 
-        const data = await response.json();
-        sendResponse({ success: true, refined: data.refined_prompt });
-
     } catch (error) {
-        console.error("Refinement failed:", error);
+        console.error("[Background] Refinement failed:", error);
         sendResponse({ success: false, error: error.message });
     }
 }

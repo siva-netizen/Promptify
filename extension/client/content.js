@@ -43,14 +43,82 @@ const PLATFORMS = {
         },
         setValue: (el, val) => {
             el.focus();
-            if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
-                const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
-                nativeInputValueSetter.call(el, val);
-                el.dispatchEvent(new Event('input', { bubbles: true }));
-                el.dispatchEvent(new Event('change', { bubbles: true }));
-            } else {
-                el.textContent = val;
-                el.dispatchEvent(new Event('input', { bubbles: true }));
+
+            try {
+                // Case 1: Textarea/Input (Native React Control)
+                if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+                    const proto = el.tagName === 'TEXTAREA'
+                        ? window.HTMLTextAreaElement.prototype
+                        : window.HTMLInputElement.prototype;
+
+                    const nativeSetter = Object.getOwnPropertyDescriptor(proto, 'value').set;
+
+                    if (nativeSetter) {
+                        nativeSetter.call(el, val);
+                    } else {
+                        el.value = val;
+                    }
+
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                // Case 2: ContentEditable Div (Slate.js / Complex Editor)
+                else {
+                    // Modern editors (Slate) listen to 'beforeinput'
+                    const beforeInputEvent = new InputEvent('beforeinput', {
+                        bubbles: true,
+                        cancelable: true,
+                        inputType: 'insertText',
+                        data: val
+                    });
+                    el.dispatchEvent(beforeInputEvent);
+
+                    // Strategy 1: execCommand 'insertText'
+                    // Select all content safely
+                    const range = document.createRange();
+                    range.selectNodeContents(el);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+
+                    const success = document.execCommand('insertText', false, val);
+
+                    // Strategy 2: Simulate Paste (if insertText failed or didn't change text)
+                    if (!success || (el.textContent !== val && el.innerText !== val)) {
+                        console.warn('[Promptify] execCommand failed. Attempting synthetic PASTE event.');
+
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.setData('text/plain', val);
+
+                        const pasteEvent = new ClipboardEvent('paste', {
+                            bubbles: true,
+                            cancelable: true,
+                            clipboardData: dataTransfer
+                        });
+
+                        el.dispatchEvent(pasteEvent);
+
+                        // Give it a moment, then check if we need to force it
+                        // (Note: we can't wait async inside this sync block easily, but the event is sync)
+
+                        // If execCommand return false or didn't update text, try fallback
+                        if (!success || (el.textContent !== val && el.innerText !== val)) {
+                            console.warn('[Promptify] execCommand failed/ignored. Trying direct Text node replacement.');
+                            // Last resort: Nuke the contents and replace with text node.
+                            // This might break editor state but is worth a try.
+                            el.textContent = val;
+                            el.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error('[Promptify] SetValue failed:', err);
+                // Fallback: Copy to clipboard
+                navigator.clipboard.writeText(val).then(() => {
+                    alert('Could not auto-update input (security restriction). Refined prompt copied to clipboard!');
+                }).catch(() => {
+                    prompt("Could not auto-update. Please copy the prompt:", val);
+                });
             }
         }
     },
