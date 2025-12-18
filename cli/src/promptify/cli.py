@@ -18,6 +18,9 @@ from promptify.core.formatter import RichFormatter, JSONFormatter
 from promptify.utils.errors import PromptifyError, ValidationError, ServiceError, ConfigurationError
 from promptify.agent.graph import promptify
 
+#Import PromptMasker
+from promptmasker import PromptMasker
+
 # Import CLI Helpers
 from promptify.cli_supports.PromptifyTUI import PromptifyTUI
 from promptify.cli_supports.help_content import HELP_CONTENT
@@ -31,6 +34,9 @@ console = Console()
 # Dependency injection
 validator = InputValidator()
 service = PromptifyService(graph=promptify)
+
+masker = PromptMasker()
+
 formatters = {
     "rich": RichFormatter(),
     "json": JSONFormatter()
@@ -97,15 +103,20 @@ def refine(
         else:
             query = validator.validate_query(query)
         
+        # 2.1 Mask sensitive data in query
+        masked_output = masker.mask(query)
+        masked_query = masked_output["masked_text"]
+        mask_map = masked_output["mask_map"]
+        
         # Show input
-        console.print(f"[cyan] Query:[/cyan] {query[:100]}{'...' if len(query) > 100 else ''}\n")
+        console.print(f"[cyan] Query:[/cyan] {masked_query[:100]}{'...' if len(masked_query) > 100 else ''}\n")
         
         # 3. Process with progress spinner
         with Progress(
             console=console,
         ) as progress:
             task = progress.add_task("[Processing] AI Agents working...", total=None)
-            result = service.refine(query)
+            result = service.refine(masked_query)
             progress.remove_task(task)
         
         console.print()
