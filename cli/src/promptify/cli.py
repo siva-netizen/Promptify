@@ -105,8 +105,12 @@ def refine(
         
         # 2.1 Mask sensitive data in query
         masked_output = masker.mask(query)
-        masked_query = masked_output["masked_text"]
-        mask_map = masked_output["mask_map"]
+        if isinstance(masked_output, dict):
+            masked_query = masked_output.get("masked_text", query)
+            mask_map = masked_output.get("mask_map", {})
+        else:
+            masked_query = str(masked_output)
+            mask_map = {}
         
         # Show input
         console.print(f"[cyan] Query:[/cyan] {masked_query[:100]}{'...' if len(masked_query) > 100 else ''}\n")
@@ -176,7 +180,7 @@ def get_version():
         return package_version("pfy")
     except PackageNotFoundError:
         import tomllib 
-        pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
+        pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
         with open(pyproject_path, "rb") as f:
             data = tomllib.load(f)
         return data["project"]["version"] 
