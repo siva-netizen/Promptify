@@ -23,6 +23,3 @@ venv/
 .vscode/
 .idea/
 *.swp
-
-#test
-res/
