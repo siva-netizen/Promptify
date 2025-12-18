@@ -8,11 +8,11 @@ dependencies = [
     "fastapi>=0.110.0",
     "uvicorn>=0.29.0",
     "python-multipart>=0.0.9",
-    "promptify-cli",
+    "pfy",
 ]
 
 [tool.uv.sources]
-promptify-cli = { path = "../../cli", editable = true }
+pfy = { path = "../../cli", editable = true }
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]

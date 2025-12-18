@@ -8,7 +8,7 @@
 Python CLI tool for prompt engineering with multi-agent system.
 
 ```bash
-pip install promptify-cli
+pip install pfy
 ```
 
 ### [Browser Extension](./extension/)
