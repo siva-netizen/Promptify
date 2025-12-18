@@ -2,7 +2,7 @@
 
 > AI-powered prompt engineering ecosystem
 
-## 📦 Packages
+## Packages
 
 ### [CLI](./cli/)
 Python CLI tool for prompt engineering with multi-agent system.
@@ -17,13 +17,13 @@ Chrome and Firefox extensions for seamless prompt refinement.
 - [Install from Chrome Web Store](#)
 - [Install from Firefox Add-ons](#)
 
-## 🏗️ Repository Structure
+## Repository Structure
 
 - `cli/` - Python CLI package (PyPI)
 - `extension/` - Browser extensions (Chrome/Firefox)
 - `docs/` - Shared documentation
 
-## 🚀 Development
+## Development
 
 ### CLI Development
 ```bash
