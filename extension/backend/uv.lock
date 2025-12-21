@@ -1261,7 +1261,7 @@ wheels = [
 [[package]]
 name = "pfy"
 version = "0.1.4"
-source = { editable = "../../cli" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "langchain" },
     { name = "langchain-google-genai" },
@@ -1274,19 +1274,9 @@ dependencies = [
     { name = "textual" },
     { name = "typer" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "langchain", specifier = ">=1.1.0" },
-    { name = "langchain-google-genai", specifier = ">=3.2.0" },
-    { name = "litellm", specifier = ">=1.80.5" },
-    { name = "promptmasker", specifier = ">=0.0" },
-    { name = "pyfiglet", specifier = ">=1.0.4" },
-    { name = "pyperclip", specifier = ">=1.11.0" },
-    { name = "python-dotenv", specifier = ">=1.0.0" },
-    { name = "rich", specifier = ">=14.2.0" },
-    { name = "textual", specifier = ">=6.7.1" },
-    { name = "typer", specifier = ">=0.20.0" },
+sdist = { url = "https://files.pythonhosted.org/packages/77/de/61930225e966f9265aca127814f38f0b81cb81fc2f0c9040a55f1e395c36/pfy-0.1.4.tar.gz", hash = "sha256:d2bc18fc46fcb414b453d040bcc5abf131d07cdd23d9e783bd2fd9de87395647", size = 19121, upload-time = "2025-12-21T12:41:03.054Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4f/aa/c6e29f3d0451f1ee9af711023089d63bd98c10152a1d0b69234dad4fff58/pfy-0.1.4-py3-none-any.whl", hash = "sha256:564d7542a4c3ddae42713a59b8e2319aedbf81503e38dbb9088104f2a557c3cf", size = 24673, upload-time = "2025-12-21T12:41:01.861Z" },
 ]
 
 [[package]]
@@ -1312,7 +1302,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.110.0" },
-    { name = "pfy", editable = "../../cli" },
+    { name = "pfy", specifier = ">=0.1.4" },
     { name = "python-multipart", specifier = ">=0.0.9" },
     { name = "uvicorn", specifier = ">=0.29.0" },
 ]

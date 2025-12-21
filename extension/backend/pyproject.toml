@@ -8,11 +8,10 @@ dependencies = [
     "fastapi>=0.110.0",
     "uvicorn>=0.29.0",
     "python-multipart>=0.0.9",
-    "pfy",
+    "pfy>=0.1.4",
 ]
 
-[tool.uv.sources]
-pfy = { path = "../../cli", editable = true }
+# [tool.uv.sources] removed to use PyPI version
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
