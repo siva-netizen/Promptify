@@ -14,9 +14,7 @@
         "https://*.perplexity.ai/*",
         "https://*.gemini.google.com/*",
         "https://copilot.microsoft.com/*",
-        "https://www.bing.com/*",
-        "http://localhost:8000/*",
-        "https://promptify-cloud.railway.app/*"
+        "http://localhost:8000/*"
     ],
     "icons": {
         "16": "icons/icon16.png",
@@ -37,8 +35,7 @@
                 "https://*.claude.ai/*",
                 "https://*.perplexity.ai/*",
                 "https://*.gemini.google.com/*",
-                "https://copilot.microsoft.com/*",
-                "https://www.bing.com/*"
+                "https://copilot.microsoft.com/*"
             ],
             "js": [
                 "content.js"
