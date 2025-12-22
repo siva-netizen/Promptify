@@ -3,7 +3,7 @@ import sys
 from typing import Optional, Dict, Any
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-
+from app_logging import logger
 from promptify.core.service import PromptifyService
 from promptify.agent.graph import promptify
 
@@ -17,7 +17,10 @@ class RefineRequest(BaseModel):
     model_provider: str = "cerebras" # cerebras, openai, etc.
     model_name: Optional[str] = None
     api_key: Optional[str] = None # Optional, user can provide their own
-    
+
+
+logger.info("Starting Promptify Cloud API...")
+
 class RefineResponse(BaseModel):
     refined_prompt: str
     original_prompt: str

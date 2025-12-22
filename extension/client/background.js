@@ -1,4 +1,9 @@
 // background.js
+try {
+    importScripts('config.js');
+} catch (e) {
+    console.error(e);
+}
 
 const API_URL = "http://localhost:8000/refine"; // Default local, configurable
 
@@ -14,9 +19,12 @@ async function handleRefineRequest(request, sendResponse) {
     try {
         const { prompt } = request;
 
-        // Get settings from storage
-        const settings = await chrome.storage.sync.get(['apiUrl', 'apiKey', 'provider', 'model']);
-        const endpoint = settings.apiUrl || API_URL;
+        // Get settings from storage (API URL is now hardcoded)
+        const settings = await chrome.storage.sync.get(['apiKey', 'provider', 'model']);
+
+        // Use hardcoded URL from config.js (loaded via manifest or import)
+        // Note: ensuring config.js is loaded in background.html/manifest
+        const endpoint = CONFIG.API_URL;
 
         console.log(`[Background] Using endpoint: ${endpoint}`);
 

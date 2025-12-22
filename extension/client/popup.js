@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (items.provider) document.getElementById('provider').value = items.provider;
         if (items.model) document.getElementById('modelName').value = items.model;
         if (items.apiKey) document.getElementById('apiKey').value = items.apiKey;
-        if (items.apiUrl) document.getElementById('apiUrl').value = items.apiUrl;
     });
 
     document.getElementById('save').addEventListener('click', () => {
@@ -18,7 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
             provider,
             model,
             apiKey,
-            apiUrl
+            provider,
+            model,
+            apiKey
         }, () => {
             const status = document.getElementById('status');
             status.textContent = 'Settings saved!';

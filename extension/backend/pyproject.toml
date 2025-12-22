@@ -9,6 +9,7 @@ dependencies = [
     "uvicorn>=0.29.0",
     "python-multipart>=0.0.9",
     "pfy>=0.1.4",
+    "concurrent-log-handler>=0.9.25",
 ]
 
 # [tool.uv.sources] removed to use PyPI version
