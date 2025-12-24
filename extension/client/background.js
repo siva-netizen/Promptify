@@ -37,7 +37,10 @@ async function handleRefineRequest(request, sendResponse) {
 
         // Create a timeout signal
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+        const timeoutId = setTimeout(() => {
+            console.warn("[Background] Request timed out after 60s");
+            controller.abort("Request timed out");
+        }, 60000); // Increased to 60s
 
         try {
             const response = await fetch(endpoint, {

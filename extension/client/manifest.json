@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Promptify",
-    "version": "1.0",
+    "version": "1.0.1",
     "description": "Transform vague prompts into professional engineering specifications.",
     "permissions": [
         "storage",
