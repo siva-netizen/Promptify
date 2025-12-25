@@ -1,6 +1,6 @@
 ﻿
 # Promptify
-[![Install from PYPI](https://pypi.org/project/pfy)]
+[![Install from PYPI](https://pypi.org/project/pfy)](https://pypi.org/project/pfy)
 ![Promptify Banner](https://capsule-render.vercel.app/api?type=waving&color=0:00BFFF,100:00008B&height=300&section=header&text=Promptify&fontSize=90&fontColor=ffffff)
 
 > **Transform vague ideas into professional engineering specifications using AI agents.**
@@ -13,7 +13,7 @@
 
 ## Introduction
 
-**Promptify** is an advanced AI-powered CLI tool designed to bridge the gap between abstract user intent and concrete technical requirements. It employs a multi-agent architecture (Triage, Critic, Expert, and Prompt Smith) to iteratively refine, critique, and enhance your prompts, delivering production-ready specifications for software projects.
+**Promptify** is an advanced AI-powered CLI tool designed to bridge the gap between abstract user intent and concrete technical requirements. It employs a multi-agent architecture (Triage, Critic, Expert, and Prompt Smith) to iteratively refine, critique, and enhance your prompts, delivering production-ready specifications for software projects. 
 
 No more back-and-forth. Just **Promptify** and build.
 
