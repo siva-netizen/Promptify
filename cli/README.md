@@ -1,6 +1,6 @@
 ﻿
 # Promptify
-
+[![Install from PYPI](https://pypi.org/project/pfy)]
 ![Promptify Banner](https://capsule-render.vercel.app/api?type=waving&color=0:00BFFF,100:00008B&height=300&section=header&text=Promptify&fontSize=90&fontColor=ffffff)
 
 > **Transform vague ideas into professional engineering specifications using AI agents.**
