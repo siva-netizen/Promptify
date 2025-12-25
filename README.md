@@ -34,16 +34,14 @@ pip install pfy
 ```
 
 ### [Browser Extension](./extension/)
-Chrome and Firefox extensions for seamless prompt refinement.
+Microsoft Edge extensions for seamless prompt refinement.
 
-- [Install from Chrome Web Store](#)
-- [Install from Firefox Add-ons](#)
+- [Install from Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/njilmlgajbhikhbbbamfeoopidhjnkmd)
 
 ## Repository Structure
 
 - `cli/` - Python CLI package (PyPI)
-- `extension/` - Browser extensions (Chrome/Firefox)
-- `docs/` - Shared documentation
+- `extension/` - Browser extensions (Microsoft Edge)
 
 ## Development
 
@@ -56,6 +54,6 @@ promptify refine "test query"
 
 ### Extension Development
 ```bash
-cd extension/chrome
+cd extension
 # Load in chrome://extensions (Developer Mode) as "Load unpacked"
 ```
