@@ -20,6 +20,7 @@ dependencies = [
     "textual>=6.7.1",
     "typer>=0.20.0",
     "promptmasker>=0.0",
+    "toon-format>=0.9.0",
 ]
 
 [project.scripts]

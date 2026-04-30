@@ -20,7 +20,7 @@ async function handleRefineRequest(request, sendResponse) {
         const { prompt } = request;
 
         // Get settings from storage (API URL is now hardcoded)
-        const settings = await chrome.storage.sync.get(['apiKey', 'provider', 'model']);
+        const settings = await chrome.storage.sync.get(['apiKey', 'provider', 'model', 'outputFormat']);
 
         // Use hardcoded URL from config.js (loaded via manifest or import)
         // Note: ensuring config.js is loaded in background.html/manifest
@@ -32,7 +32,8 @@ async function handleRefineRequest(request, sendResponse) {
             prompt: prompt,
             model_provider: settings.provider || 'cerebras',
             model_name: settings.model,
-            api_key: settings.apiKey
+            api_key: settings.apiKey,
+            output_format: settings.outputFormat || 'markdown'
         };
 
         // Create a timeout signal
