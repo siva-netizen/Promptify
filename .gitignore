@@ -27,3 +27,5 @@ config.yaml
 .vscode/
 .idea/
 *.swp
+
+logs/
