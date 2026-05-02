@@ -24,7 +24,7 @@ async function handleRefineRequest(request, sendResponse) {
 
         // Use hardcoded URL from config.js (loaded via manifest or import)
         // Note: ensuring config.js is loaded in background.html/manifest
-        const endpoint = CONFIG.API_URL;
+        const endpoint = await CONFIG.API_URL;
 
         console.log(`[Background] Using endpoint: ${endpoint}`);
 
