@@ -19,7 +19,13 @@ extension/**/*.zip
 .venv/
 venv/
 
+# User config (lives in ~/.promptify/config.yml, not in repo)
+config.yml
+config.yaml
+
 # IDE
 .vscode/
 .idea/
 *.swp
+
+logs/

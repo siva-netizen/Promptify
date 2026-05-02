@@ -1,7 +1,5 @@
 """Business logic for prompt refinement"""
 from promptify.utils.errors import ServiceError, rate_limit_error, network_error
-from promptify.formatters import FormatterRegistry
-from promptify.formatters.base import PromptResult
 
 
 class PromptifyService:
@@ -10,7 +8,7 @@ class PromptifyService:
     def __init__(self, graph):
         self.graph = graph
 
-    def refine(self, query: str, model_provider: str = None, model_name: str = None, api_key: str = None, output_format: str = None) -> dict | str:
+    def refine(self, query: str, model_provider: str = None, model_name: str = None, api_key: str = None) -> dict:
         """Refine a prompt using the agent graph"""
         initial_state = {
             "user_query": query,
@@ -27,21 +25,7 @@ class PromptifyService:
         }
         
         try:
-            state = self.graph.invoke(initial_state)
-
-            if output_format:
-                result = PromptResult(
-                    original=query,
-                    refined=state.get("final_prompt_draft", ""),
-                    metadata={
-                        "provider": model_provider,
-                        "model": model_name,
-                        "iterations": state.get("iteration_count", 0),
-                    },
-                )
-                return FormatterRegistry.format(output_format, result)
-
-            return state
+            return self.graph.invoke(initial_state)
         
         except Exception as e:
             error_message = str(e).lower()
