@@ -17,6 +17,7 @@ class RefineRequest(BaseModel):
     model_provider: str = "cerebras" # cerebras, openai, etc.
     model_name: Optional[str] = None
     api_key: Optional[str] = None # Optional, user can provide their own
+    output_format: Optional[str] = None # e.g. "markdown", "toon"
 
 
 logger.info("Starting Promptify Cloud API...")
@@ -46,11 +47,16 @@ async def refine_prompt(request: RefineRequest):
             query=request.prompt,
             model_provider=request.model_provider,
             model_name=request.model_name,
-            api_key=request.api_key
+            api_key=request.api_key,
+            output_format=request.output_format
         )
-        
-        refined = result.get('final_prompt_draft', 'Error: No refined prompt generated')
-        
+
+        # service.refine() returns a str when output_format is set, dict otherwise
+        if isinstance(result, str):
+            refined = result
+        else:
+            refined = result.get('final_prompt_draft', 'Error: No refined prompt generated')
+
         return RefineResponse(
             refined_prompt=refined,
             original_prompt=request.prompt
@@ -99,6 +105,7 @@ def main(context):
             model_provider = body.get("model_provider", "cerebras")
             model_name = body.get("model_name")
             api_key = body.get("api_key")
+            output_format = body.get("output_format")
 
             # Set API Key in Env (for this execution only)
             if api_key:
@@ -112,10 +119,15 @@ def main(context):
                 query=prompt_text,
                 model_provider=model_provider,
                 model_name=model_name,
-                api_key=api_key
+                api_key=api_key,
+                output_format=output_format
             )
-            
-            refined = result.get('final_prompt_draft', 'Error: No refined prompt generated')
+
+            # service.refine() returns a str when output_format is set, dict otherwise
+            if isinstance(result, str):
+                refined = result
+            else:
+                refined = result.get('final_prompt_draft', 'Error: No refined prompt generated')
             
             logger.info("Refinement successful")
 
