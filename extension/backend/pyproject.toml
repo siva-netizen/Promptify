@@ -7,7 +7,7 @@ dependencies = [
     "fastapi>=0.110.0",
     "uvicorn>=0.29.0",
     "python-multipart>=0.0.9",
-    "pfy>=0.1.5",
+    "pfy>=0.1.6",
     "concurrent-log-handler>=0.9.25",
 ]
 

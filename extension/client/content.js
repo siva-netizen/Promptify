@@ -238,6 +238,9 @@ function findTargetElement(selectors) {
 async function sendMessageWithRetry(msg, retries = 2) {
     for (let i = 0; i < retries; i++) {
         try {
+            if (!chrome?.runtime?.sendMessage) {
+                throw new Error('Extension context unavailable. Please reload the page.');
+            }
             return await chrome.runtime.sendMessage(msg);
         } catch (err) {
             if (i < retries - 1 && err.message?.includes('Extension context invalidated')) {
