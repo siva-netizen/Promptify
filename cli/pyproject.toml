@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pfy"
-version = "0.1.6"
+version = "0.1.7"
 description = "AI-powered prompt engineering CLI with multi-agent system"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -20,7 +20,7 @@ dependencies = [
     "textual>=6.7.1",
     "typer>=0.20.0",
     "promptmasker>=0.0",
-    "toon-format>=0.9.0",
+    "toon-format>=0.9.0b1",
 ]
 
 [project.scripts]
