@@ -234,6 +234,24 @@ function findTargetElement(selectors) {
     return null;
 }
 
+// Retry sendMessage once to handle inactive service worker (context invalidated)
+async function sendMessageWithRetry(msg, retries = 2) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            if (!chrome?.runtime?.sendMessage) {
+                throw new Error('Extension context unavailable. Please reload the page.');
+            }
+            return await chrome.runtime.sendMessage(msg);
+        } catch (err) {
+            if (i < retries - 1 && err.message?.includes('Extension context invalidated')) {
+                await new Promise(r => setTimeout(r, 500)); // give SW time to wake
+                continue;
+            }
+            throw err;
+        }
+    }
+}
+
 function injectButton(inputEl) {
     const btn = document.createElement('button');
     btn.id = 'promptify-btn';
@@ -340,7 +358,7 @@ function injectButton(inputEl) {
         btn.disabled = true;
 
         try {
-            const resp = await chrome.runtime.sendMessage({
+            const resp = await sendMessageWithRetry({
                 type: 'REFINE_PROMPT',
                 prompt: currentText
             });
