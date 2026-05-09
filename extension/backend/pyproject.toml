@@ -2,7 +2,7 @@
 name = "promptify-backend"
 version = "0.1.0"
 description = "Cloud API Backend for Promptify Extension"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.14"
 dependencies = [
     "fastapi>=0.110.0",
     "uvicorn>=0.29.0",
@@ -12,6 +12,9 @@ dependencies = [
 ]
 
 # [tool.uv.sources] removed to use PyPI version
+
+[tool.uv]
+prerelease = "allow"
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
