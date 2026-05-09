@@ -7,14 +7,12 @@ dependencies = [
     "fastapi>=0.110.0",
     "uvicorn>=0.29.0",
     "python-multipart>=0.0.9",
-    "pfy>=0.1.7",
+    "pfy>=0.1.9",
     "concurrent-log-handler>=0.9.25",
 ]
 
 # [tool.uv.sources] removed to use PyPI version
 
-[tool.uv]
-prerelease = "allow"
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
