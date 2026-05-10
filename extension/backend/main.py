@@ -4,13 +4,19 @@ from typing import Optional, Dict, Any
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from app_logging import logger
-from promptify.core.service import PromptifyService
-from promptify.agent.graph import promptify
 
 app = FastAPI(title="Promptify Cloud API")
 
-# Initialize the service
-service = PromptifyService(graph=promptify)
+# Lazy initialization — avoids crash at Appwrite cold start
+_service = None
+
+def get_service():
+    global _service
+    if _service is None:
+        from promptify.core.service import PromptifyService
+        from promptify.agent.graph import promptify
+        _service = PromptifyService(graph=promptify)
+    return _service
 
 class RefineRequest(BaseModel):
     prompt: str
@@ -19,8 +25,6 @@ class RefineRequest(BaseModel):
     api_key: Optional[str] = None # Optional, user can provide their own
     output_format: Optional[str] = None # e.g. "markdown", "toon"
 
-
-logger.info("Starting Promptify Cloud API...")
 
 class RefineResponse(BaseModel):
     refined_prompt: str
@@ -43,7 +47,7 @@ async def refine_prompt(request: RefineRequest):
             os.environ[key_name] = request.api_key
         
         # Use the service to refine the prompt
-        result = service.refine(
+        result = get_service().refine(
             query=request.prompt,
             model_provider=request.model_provider,
             model_name=request.model_name,
@@ -51,7 +55,7 @@ async def refine_prompt(request: RefineRequest):
             output_format=request.output_format
         )
 
-        # service.refine() returns a str when output_format is set, dict otherwise
+        # get_service().refine() returns a str when output_format is set, dict otherwise
         if isinstance(result, str):
             refined = result
         else:
@@ -115,7 +119,7 @@ def main(context):
             logger.info(f"Refining prompt with provider: {model_provider}")
 
             # Call Service
-            result = service.refine(
+            result = get_service().refine(
                 query=prompt_text,
                 model_provider=model_provider,
                 model_name=model_name,
@@ -123,7 +127,7 @@ def main(context):
                 output_format=output_format
             )
 
-            # service.refine() returns a str when output_format is set, dict otherwise
+            # get_service().refine() returns a str when output_format is set, dict otherwise
             if isinstance(result, str):
                 refined = result
             else:
