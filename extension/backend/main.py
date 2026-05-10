@@ -1,11 +1,6 @@
 import os
-import sys
-from typing import Optional, Dict, Any
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+import json
 from app_logging import logger
-
-app = FastAPI(title="Promptify Cloud API")
 
 # Lazy initialization — avoids crash at Appwrite cold start
 _service = None
@@ -17,61 +12,6 @@ def get_service():
         from promptify.agent.graph import promptify
         _service = PromptifyService(graph=promptify)
     return _service
-
-class RefineRequest(BaseModel):
-    prompt: str
-    model_provider: str = "cerebras" # cerebras, openai, etc.
-    model_name: Optional[str] = None
-    api_key: Optional[str] = None # Optional, user can provide their own
-    output_format: Optional[str] = None # e.g. "markdown", "toon"
-
-
-class RefineResponse(BaseModel):
-    refined_prompt: str
-    original_prompt: str
-
-@app.get("/health")
-def health_check():
-    return {"status": "ok", "service": "promptify-cloud"}
-
-@app.post("/refine", response_model=RefineResponse)
-async def refine_prompt(request: RefineRequest):
-    """
-    Refines the given prompt using the Promptify Agentic workflow.
-    """
-    try:
-        # Set API key if provided
-        if request.api_key:
-            # Set the appropriate env var based on provider
-            key_name = f"{request.model_provider.upper()}_API_KEY"
-            os.environ[key_name] = request.api_key
-        
-        # Use the service to refine the prompt
-        result = get_service().refine(
-            query=request.prompt,
-            model_provider=request.model_provider,
-            model_name=request.model_name,
-            api_key=request.api_key,
-            output_format=request.output_format
-        )
-
-        # get_service().refine() returns a str when output_format is set, dict otherwise
-        if isinstance(result, str):
-            refined = result
-        else:
-            refined = result.get('final_prompt_draft', 'Error: No refined prompt generated')
-
-        return RefineResponse(
-            refined_prompt=refined,
-            original_prompt=request.prompt
-        )
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 # --- Appwrite Function Entrypoint ---
 def main(context):
